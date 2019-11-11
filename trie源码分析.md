@@ -242,15 +242,17 @@ trie的结构， root包含了当前的root节点， db是后端的KV存储，tr
 	}
 
 
-###Trie树的插入，查找和删除
+### Trie树的插入，查找和删除
 Trie树的初始化调用New函数，函数接受一个hash值和一个Database参数，如果hash值不是空值的化，就说明是从数据库加载一个已经存在的Trie树， 就调用trei.resolveHash方法来加载整颗Trie树，这个方法后续会介绍。 如果root是空，那么就新建一颗Trie树返回。
 
-	func New(root common.Hash, db Database) (*Trie, error) {
-		trie := &Trie{db: db, originalRoot: root}
-		if (root != common.Hash{}) && root != emptyRoot {
-			if db == nil {
-				panic("trie.New: cannot use existing root without a database")
-			}
+	func New(root common.Hash, db *Database) (*Trie, error) {
+		if db == nil {
+			panic("trie.New called without a database")
+		}
+		trie := &Trie{
+			db: db,
+		}
+		if root != (common.Hash{}) && root != emptyRoot {
 			rootnode, err := trie.resolveHash(root[:], nil)
 			if err != nil {
 				return nil, err
